@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const TopicSchema = new Schema({
@@ -9,9 +9,9 @@ const TopicSchema = new Schema({
   slug: {
     type: String,
     lowercase: true,
-    required: true,
+    required: false,
     unique: true
   }
 });
 
-module.exports = mongoose.model('topics', TopicSchema);
+module.exports = mongoose.model("topics", TopicSchema);

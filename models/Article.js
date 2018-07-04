@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const ArticleSchema = new Schema({
@@ -21,14 +21,14 @@ const ArticleSchema = new Schema({
   },
   belongs_to: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'topics',
+    ref: "topics",
     required: true
   },
   created_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
+    ref: "users",
     required: true
   }
 });
 
-module.exports = mongoose.model('articles', ArticleSchema);
+module.exports = mongoose.model("articles", ArticleSchema);
