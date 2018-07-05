@@ -8,13 +8,15 @@ const getAllUsers = (req, res, next) => {
     .catch(next);
 };
 
-const getUserById = (req, res, next) => {
-  const { user_id } = req.params;
-  User.findById(user_id)
+const getUserByUsername = (req, res, next) => {
+  const { username } = req.params;
+  User.find({ username: `${username}` })
     .then(user => {
       res.status(200).send({ user });
     })
     .catch(next);
 };
 
-module.exports = { getAllUsers, getUserById };
+// const getReposByUsername = (req, res, next) => {};
+
+module.exports = { getAllUsers, getUserByUsername };

@@ -1,4 +1,4 @@
-const { Article } = require("../models/index");
+const { Article, Comment } = require("../models/index");
 
 const getAllArticles = (req, res, next) => {
   Article.find()
@@ -17,4 +17,15 @@ const getArticleById = (req, res, next) => {
     .catch(next);
 };
 
-module.exports = { getAllArticles, getArticleById };
+const getCommentsByArticleId = (req, res, next) => {
+  let { article_id } = req.params;
+  Article.find()
+    .populate("belongs_to", "slug")
+    .populate("created_by", "username")
+    .then(comment => {
+      return res.status(200).send({ comment });
+    })
+    .catch(next);
+};
+
+module.exports = { getAllArticles, getArticleById, getCommentsByArticleId };

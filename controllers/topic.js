@@ -17,14 +17,18 @@ const getTopicById = (req, res, next) => {
     .catch(next);
 };
 
-// , getArticlesByTopic
-// const getArticlesByTopic = (req, res, next) => {
-//   const { topic_id } = req.params;
-//   Article.find({ belongs_to: `${topic_id}` })
-//     .populate("created_by", "name")
-//     .then(article => {
-//       return res.status.send(200).send(article);
-//     });
-// };
+const getArticlesByTopic = (req, res, next) => {
+  let { topic } = req.params;
+  Article.find()
+    .populate("belongs_to", "slug")
+    .populate("created_by", "username")
+    .then(article => {
+      article = article.filter(topics => {
+        return (topics.belongs_to.slug = topic);
+      });
+      return res.status(200).send({ article });
+    })
+    .catch(next);
+};
 
-module.exports = { getAllTopics, getTopicById };
+module.exports = { getAllTopics, getTopicById, getArticlesByTopic };

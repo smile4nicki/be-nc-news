@@ -25,12 +25,12 @@ const createUserRef = (collection, docs) => {
 };
 
 const formatArticleData = (articleData, topicRef, userRef) => {
-  articleData.map(article => {
-    article.created_by = userRef[article.created_by];
-    article.belongs_to = topicRef[article.topic];
-    console.log(article);
+  return articleData.map(article => {
+    const newArticle = Object.assign({}, article);
+    newArticle.created_by = userRef[article.created_by];
+    newArticle.belongs_to = topicRef[article.topic];
+    return newArticle;
   });
-  return articleData;
 };
 
 const createArticleRef = (collection, docs) => {
@@ -41,11 +41,12 @@ const createArticleRef = (collection, docs) => {
 };
 
 const formatCommentData = (commentData, articleRef, userRef) => {
-  commentData.map(comment => {
-    comment.created_by = userRef[comment.created_by];
-    comment.belongs_to = articleRef[comment.belongs_to];
+  return commentData.map(comment => {
+    const newComment = Object.assign({}, comment);
+    newComment.created_by = userRef[comment.created_by];
+    newComment.belongs_to = articleRef[comment.belongs_to];
+    return newComment;
   });
-  return commentData;
 };
 
 module.exports = {
