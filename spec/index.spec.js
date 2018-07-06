@@ -86,11 +86,18 @@ describe("northcoders_news", () => {
           expect(res.body.article).to.be.an("object");
         });
     });
-    // it(`POST /api/topics/${topicDocs[0]._id}`).send({
-    //   title: "anotherTest",
-    //   body: "helloAgain",
-    //   created_by: NANANANANNANANA
-    // }).expect(400);
+    it(`POST responds with 400 for missing required field`, () => {
+      return request
+        .post(`/api/topics/${topicDocs[0]._id}/articles`)
+        .send({
+          title: "anotherTest"
+        })
+        .expect(400)
+        .then(res => {
+          console.log(res);
+          expect(res.body).to.equal(`Bad request : name is required!`);
+        });
+    });
   });
   describe("/articles", () => {
     it("GET responds with 200 and an array of articles", () => {
@@ -139,7 +146,6 @@ describe("northcoders_news", () => {
         );
       });
   });
-
   it("PUT /api/articles/:article_id?vote=down", () => {
     return request
       .put(`/api/articles/${articleDocs[0]._id}?vote=down`)
@@ -172,7 +178,6 @@ describe("northcoders_news", () => {
           );
         });
     });
-
     it("POST responds with status 201 and a new article added to the article", () => {
       return request
         .post(`/api/articles/${articleDocs[0]._id}/comments`)
@@ -242,15 +247,15 @@ describe("northcoders_news", () => {
         expect(res.body.comment.votes).to.be.greaterThan(commentDocs[0].votes);
       });
   });
-  it.only(`DELETE responds with 202 and a console log saying 'Comment Delted!`, () => {
+  it(`DELETE responds with 200 and a console log saying 'Comment Delted!`, () => {
     return request
-      .delete(`/api/coments/${commentDocs[0]._id}`)
+      .delete(`/api/comments/${commentDocs[0]._id}`)
       .expect(200)
       .then(res => {
-        expect(res.body.comment.length).to.equal(commentDocs.length - 1);
+        expect(res.body.message).to.equal("Comment Deleted!");
+        return request.get(`/api/comments/${commentDocs[0]._id}`).expect(404);
       });
   });
-
   describe("/users", () => {
     it("GET responds with 200 and an array of users", () => {
       return request
@@ -266,30 +271,32 @@ describe("northcoders_news", () => {
           expect(res.body.user[0].name).to.be.a("string");
         });
     });
-  });
-  describe("/users/:username", () => {
-    it("GET responds with a status 200 and user with the correct username", () => {
+    describe("/users/:username", () => {
+      it("GET responds with a status 200 and user with the correct username", () => {
+        return request
+          .get(`/api/users/${userDocs[0].username}`)
+          .expect(200)
+          .then(res => {
+            expect(res.body.user[0].username).to.equal(
+              `${userDocs[0].username}`
+            );
+            expect(res.body.user[0]).to.include.keys(
+              "username",
+              "name",
+              "avatar_url"
+            );
+            expect(res.body.user[0].name).to.be.a("string");
+          });
+      });
+    });
+    it("GET responds with status 404 for a username that does not exist", () => {
       return request
-        .get(`/api/users/${userDocs[0].username}`)
+        .get("/api/users/dumdumdum")
         .expect(200)
         .then(res => {
-          expect(res.body.user[0].username).to.equal(`${userDocs[0].username}`);
-          expect(res.body.user[0]).to.include.keys(
-            "username",
-            "name",
-            "avatar_url"
-          );
-          expect(res.body.user[0].name).to.be.a("string");
+          // console.log(res);
+          expect(res.text).to.equal(`Page not found for dumdumdum`);
         });
     });
   });
-  // it.only("GET responds with status 404 for a username that does not exist", () => {
-  //   return request
-  //     .get("/api/users/dumdumdum")
-  //     .expect(200)
-  //     .then(res => {
-  //       // console.log(res);
-  //       expect(res.text).to.equal(`Page not found for dumdumdum`);
-  //     });
-  // });
 });

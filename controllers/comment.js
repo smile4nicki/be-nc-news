@@ -13,7 +13,7 @@ const getCommentById = (req, res, next) => {
   Comment.findById(comment_id)
     .then(comment => {
       comment === null
-        ? next({ status: 404, message: `Page not found for${comment_id}` })
+        ? next({ status: 404, message: `Page not found for ${comment_id}` })
         : res.status(200).send({ comment });
     })
     .catch(next);
@@ -38,10 +38,7 @@ const deleteCommentById = (req, res, next) => {
   let { comment_id } = req.params;
   Comment.findByIdAndRemove(comment_id)
     .then(comment => {
-      return Comment.find();
-    })
-    .then(() => {
-      res.status(202).send(`msg:Comment Deleted!`);
+      res.status(200).send({ comment, message: "Comment Deleted!" });
     })
     .catch(next);
 };
