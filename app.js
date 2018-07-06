@@ -12,25 +12,26 @@ app.use("/api", apiRouter);
 mongoose.connect(DB_URL).then(() => {
   console.log("You are connected to the Mongo Database!");
 });
-// app.use(bodyParser.urlencoded({ extended: false }));
 
-// app.set("view engine", "ejs");
-
-app.use(express.static(__dirname + "/public"));
-
-// app.get("/", (req, res) => {
-//   res.render("pages/index");
-// });
-
-app.use("/*", (req, res, next) => {
-  next({ status: 404, message: "Page not found" });
-});
-
+//ERR status 404 page not found
 app.use((err, req, res, next) => {
-  if (err.status) res.status(err.status).send({ message: err.message });
-  else next(err);
+  err.status
+    ? res.status(err.status).send({ message: err.message })
+    : next(err);
 });
 
+//ERR status 400 bad request
+app.use((err, req, res, next) => {
+  err.name === "CastError"
+    ? res.status(400).send(`Bad request : "${err.value}" is an invalid ID!`)
+    : err.name === "ValidationError"
+      ? res
+          .status(400)
+          .send(`Bad request : ${err.errors.name.path} is requried!}`)
+      : next(err);
+});
+
+//ERR status 500 internal server error
 app.use((err, req, res, next) => {
   console.log(err);
   res.status(500).send({ message: "Internal Server Error" });

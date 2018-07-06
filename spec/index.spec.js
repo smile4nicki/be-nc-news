@@ -15,7 +15,6 @@ describe("northcoders_news", () => {
   beforeEach(() => {
     return seedDB(testData).then(docs => {
       [commentDocs, topicDocs, userDocs, articleDocs] = docs;
-      // console.log(docs[0]);
     });
   });
   after(() => {
@@ -27,7 +26,6 @@ describe("northcoders_news", () => {
         .get("/api/topics")
         .expect(200)
         .then(res => {
-          // console.log(res.body.topic);
           expect(res.body.topic.length).to.equal(topicDocs.length);
           expect(res.body.topic[0]).to.include.keys("title", "slug");
           expect(res.body.topic[0].title).to.be.a("string");
@@ -44,10 +42,20 @@ describe("northcoders_news", () => {
         });
     });
   });
-  describe("/topics/:topic/articles", () => {
-    it("GET responds with status 200 and articles based on the topic input", () => {
+  it("GET responds with status 400 for an invalid mongo ID", () => {
+    return request
+      .get("/api/topics/dumdumdum")
+      .expect(400)
+      .then(res => {
+        expect(res.text).to.equal(
+          `Bad request : "dumdumdum" is an invalid ID!`
+        );
+      });
+  });
+  describe("/topics/:topic_id/articles", () => {
+    it("GET responds with status 200 and articles based on the topic id", () => {
       return request
-        .get(`/api/topics/${topicDocs[0].slug}/articles`)
+        .get(`/api/topics/${topicDocs[0]._id}/articles`)
         .expect(200)
         .then(res => {
           expect(res.body.article[0].belongs_to.slug).to.equal(
@@ -64,8 +72,122 @@ describe("northcoders_news", () => {
           expect(res.body.article[0].title).to.be.a("string");
         });
     });
+    it("POST responds with status 201 and a new article added to the topic", () => {
+      return request
+        .post(`/api/topics/${topicDocs[0]._id}/articles`)
+        .send({
+          title: "test",
+          body: "hello",
+          created_by: `${userDocs[0]._id}`
+        })
+        .expect(201)
+        .then(res => {
+          expect(res.body.article.title).to.be.a("string");
+          expect(res.body.article).to.be.an("object");
+        });
+    });
+    // it(`POST /api/topics/${topicDocs[0]._id}`).send({
+    //   title: "anotherTest",
+    //   body: "helloAgain",
+    //   created_by: NANANANANNANANA
+    // }).expect(400);
+  });
+  describe("/articles", () => {
+    it("GET responds with 200 and an array of articles", () => {
+      return request
+        .get("/api/articles")
+        .expect(200)
+        .then(res => {
+          expect(res.body.article.length).to.equal(articleDocs.length);
+          expect(res.body.article[0]).to.include.keys(
+            "title",
+            "body",
+            "votes",
+            "created_at",
+            "belongs_to",
+            "created_by"
+          );
+          expect(res.body.article[0].votes).to.be.a("number");
+        });
+    });
+  });
+  describe("/articles/:article_id", () => {
+    it("GET responds with a status 200 and an article with the correct id", () => {
+      return request
+        .get(`/api/articles/${articleDocs[0]._id}`)
+        .expect(200)
+        .then(res => {
+          expect(res.body.article._id).to.equal(`${articleDocs[0]._id}`);
+          expect(res.body.article).to.include.keys(
+            "title",
+            "body",
+            "votes",
+            "created_at",
+            "belongs_to",
+            "created_by"
+          );
+        });
+    });
+  });
+  it("GET responds with status 400 for an invalid mongo ID", () => {
+    return request
+      .get("/api/articles/dumdumdum")
+      .expect(400)
+      .then(res => {
+        expect(res.text).to.equal(
+          `Bad request : "dumdumdum" is an invalid ID!`
+        );
+      });
   });
 
+  it("PUT /api/articles/:article_id?vote=down", () => {
+    return request
+      .put(`/api/articles/${articleDocs[0]._id}?vote=down`)
+      .expect(200)
+      .then(res => {
+        expect(res.body.article.votes).to.be.lessThan(articleDocs[0].votes);
+      });
+  });
+  it("PUT /api/articles/:article_id?vote=up", () => {
+    return request
+      .put(`/api/articles/${articleDocs[0]._id}?vote=up`)
+      .expect(200)
+      .then(res => {
+        expect(res.body.article.votes).to.be.greaterThan(articleDocs[0].votes);
+      });
+  });
+  describe("/articles/:article_id/comments", () => {
+    it("GET responds with a status of 200 and an array of comments realated to an article id", () => {
+      return request
+        .get(`/api/articles/${articleDocs[0]._id}/comments`)
+        .expect(200)
+        .then(res => {
+          expect(res.body.comment[0].belongs_to).to.be.a("string");
+          expect(res.body.comment[0]).to.include.keys(
+            "body",
+            "votes",
+            "created_at",
+            "belongs_to",
+            "created_by"
+          );
+        });
+    });
+
+    it("POST responds with status 201 and a new article added to the article", () => {
+      return request
+        .post(`/api/articles/${articleDocs[0]._id}/comments`)
+        .send({
+          title: "test",
+          body: "hello",
+          belongs_to: `${articleDocs[0]._id}`,
+          created_by: `${userDocs[0]._id}`
+        })
+        .expect(201)
+        .then(res => {
+          expect(res.body.comment.body).to.be.a("string");
+        });
+    });
+  });
   describe("/comments", () => {
     it("GET responds with 200 and an array of comments", () => {
       return request
@@ -94,35 +216,41 @@ describe("northcoders_news", () => {
         });
     });
   });
-  describe("/articles", () => {
-    it("GET responds with 200 and an array of articles", () => {
-      return request
-        .get("/api/articles")
-        .expect(200)
-        .then(res => {
-          expect(res.body.article.length).to.equal(articleDocs.length);
-          expect(res.body.article[0]).to.include.keys(
-            "title",
-            "body",
-            "votes",
-            "created_at",
-            "belongs_to",
-            "created_by"
-          );
-          expect(res.body.article[0].votes).to.be.a("number");
-        });
-    });
+  it("GET responds with status 400 for an invalid mongo ID", () => {
+    return request
+      .get("/api/comments/dumdumdum")
+      .expect(400)
+      .then(res => {
+        expect(res.text).to.equal(
+          `Bad request : "dumdumdum" is an invalid ID!`
+        );
+      });
   });
-  describe("/articles/:article_id", () => {
-    it("GET responds with a status 200 and an article with the correct id", () => {
-      return request
-        .get(`/api/articles/${articleDocs[0]._id}`)
-        .expect(200)
-        .then(res => {
-          expect(res.body.article._id).to.equal(`${articleDocs[0]._id}`);
-        });
-    });
+  it("PUT /api/comments/:comment_id?vote=down", () => {
+    return request
+      .put(`/api/comments/${commentDocs[0]._id}?vote=down`)
+      .expect(200)
+      .then(res => {
+        expect(res.body.comment.votes).to.be.lessThan(commentDocs[0].votes);
+      });
   });
+  it("PUT /api/comments/:comment_id?vote=up", () => {
+    return request
+      .put(`/api/comments/${commentDocs[0]._id}?vote=up`)
+      .expect(200)
+      .then(res => {
+        expect(res.body.comment.votes).to.be.greaterThan(commentDocs[0].votes);
+      });
+  });
+  it.only(`DELETE responds with 202 and a console log saying 'Comment Delted!`, () => {
+    return request
+      .delete(`/api/coments/${commentDocs[0]._id}`)
+      .expect(200)
+      .then(res => {
+        expect(res.body.comment.length).to.equal(commentDocs.length - 1);
+      });
+  });
+
   describe("/users", () => {
     it("GET responds with 200 and an array of users", () => {
       return request
@@ -146,7 +274,22 @@ describe("northcoders_news", () => {
         .expect(200)
         .then(res => {
           expect(res.body.user[0].username).to.equal(`${userDocs[0].username}`);
+          expect(res.body.user[0]).to.include.keys(
+            "username",
+            "name",
+            "avatar_url"
+          );
+          expect(res.body.user[0].name).to.be.a("string");
         });
     });
   });
+  // it.only("GET responds with status 404 for a username that does not exist", () => {
+  //   return request
+  //     .get("/api/users/dumdumdum")
+  //     .expect(200)
+  //     .then(res => {
+  //       // console.log(res);
+  //       expect(res.text).to.equal(`Page not found for dumdumdum`);
+  //     });
+  // });
 });

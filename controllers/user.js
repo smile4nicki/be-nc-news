@@ -17,6 +17,4 @@ const getUserByUsername = (req, res, next) => {
     .catch(next);
 };
 
-// const getReposByUsername = (req, res, next) => {};
-
 module.exports = { getAllUsers, getUserByUsername };
