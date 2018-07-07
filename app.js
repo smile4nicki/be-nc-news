@@ -22,13 +22,17 @@ app.use((err, req, res, next) => {
 
 //ERR status 400 bad request
 app.use((err, req, res, next) => {
-  err.name === "CastError"
-    ? res.status(400).send(`Bad request : "${err.value}" is an invalid ID!`)
-    : err.name === "ValidationError"
-      ? res
-          .status(400)
-          .send(`Bad request : ${err.errors.name.path} is requried!}`)
-      : next(err);
+  if (err.name === "CastError") {
+    res.status(400).send(`Bad request : "${err.value}" is an invalid ID!`);
+  }
+  if (err.name === "ValidationError") {
+    res.status(400).send(`Bad request : ${err.errors.name.path} is requried!}`);
+  }
+  if (err.name === "TypeError") {
+    res.status(400).send(`Bad request : ${err.errors.name.path} is required!}`);
+  } else {
+    next(err);
+  }
 });
 
 //ERR status 500 internal server error

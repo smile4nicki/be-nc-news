@@ -12,11 +12,15 @@ const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   Article.findById(article_id)
     .then(article => {
-      article === null
-        ? next({ status: 404, message: `Page not found for ${article_id}` })
-        : res.status(200).send({ article });
+      res.status(200).send({ article });
     })
-    .catch(next);
+    .catch(err => {
+      if (err.name === "CastError") {
+        next({ status: 404, message: `Page not found for ${article_id}` });
+      } else {
+        next(err);
+      }
+    });
 };
 
 const getCommentsByArticleId = (req, res, next) => {
@@ -25,21 +29,35 @@ const getCommentsByArticleId = (req, res, next) => {
     .then(comment => {
       return res.status(200).send({ comment });
     })
-    .catch(next);
+    .catch(err => {
+      console.log(err.errors.body);
+      next({
+        status: 400,
+        message: `Bad request : dumdumdum is an invalid id!`
+      }).catch(next);
+    });
 };
 
 const addCommentsByArticleId = (req, res, next) => {
   let { article_id } = req.params;
   const newComment = new Comment({ ...req.body, belongs_to: article_id });
-  console.log(newComment);
   return newComment
     .save()
     .then(comment => {
       return res
         .status(201)
-        .send({ comment, message: `Just added this topic` });
+        .send({ comment, message: `Just added this comment` });
     })
-    .catch(next);
+    .catch(err => {
+      if (err.name === "ValidationError") {
+        next({
+          status: 400,
+          message: `Bad request : ${err.errors.body.path} is required!`
+        });
+      } else {
+        next(err);
+      }
+    });
 };
 
 const voteArticleById = (req, res, next) => {
@@ -52,7 +70,15 @@ const voteArticleById = (req, res, next) => {
     { new: true }
   )
     .then(article => {
-      return res.status(200).send({ article });
+      res.status(200).send({ article });
+    })
+    .catch(err => {
+      if (err.name === "CatchError") {
+        next({
+          status: 400,
+          message: `Bad request : ${article_id} is an invalid id!`
+        });
+      }
     })
     .catch(next);
 };

@@ -12,11 +12,15 @@ const getCommentById = (req, res, next) => {
   const { comment_id } = req.params;
   Comment.findById(comment_id)
     .then(comment => {
-      comment === null
-        ? next({ status: 404, message: `Page not found for ${comment_id}` })
-        : res.status(200).send({ comment });
+      res.status(200).send({ comment });
     })
-    .catch(next);
+    .catch(err => {
+      if (err.name === "CastError") {
+        next({ status: 404, message: `Page not found for ${comment_id}` });
+      } else {
+        next(err);
+      }
+    });
 };
 
 const voteCommentById = (req, res, next) => {
@@ -30,6 +34,14 @@ const voteCommentById = (req, res, next) => {
   )
     .then(comment => {
       return res.status(200).send({ comment });
+    })
+    .catch(err => {
+      if (err.name === "CastError") {
+        return next({
+          status: 400,
+          message: `Bad request : ${comment_id} is an invalid id!`
+        });
+      }
     })
     .catch(next);
 };

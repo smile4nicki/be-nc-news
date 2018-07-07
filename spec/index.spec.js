@@ -42,14 +42,12 @@ describe("northcoders_news", () => {
         });
     });
   });
-  it("GET responds with status 400 for an invalid mongo ID", () => {
+  it("GET responds with status 400 for an invalid mongo topic ID", () => {
     return request
       .get("/api/topics/dumdumdum")
-      .expect(400)
+      .expect(404)
       .then(res => {
-        expect(res.text).to.equal(
-          `Bad request : "dumdumdum" is an invalid ID!`
-        );
+        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
       });
   });
   describe("/topics/:topic_id/articles", () => {
@@ -72,7 +70,17 @@ describe("northcoders_news", () => {
           expect(res.body.article[0].title).to.be.a("string");
         });
     });
-    it("POST responds with status 201 and a new article added to the topic", () => {
+    it("GET responds with status 400 for an invalid topic mongo ID", () => {
+      return request
+        .get("/api/topics/dumdumdum/articles")
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            `Bad request : dumdumdum is an invalid ID!`
+          );
+        });
+    });
+    it("POST responds with status 201 and a new article added to the topic id", () => {
       return request
         .post(`/api/topics/${topicDocs[0]._id}/articles`)
         .send({
@@ -86,16 +94,15 @@ describe("northcoders_news", () => {
           expect(res.body.article).to.be.an("object");
         });
     });
-    it(`POST responds with 400 for missing required field`, () => {
+    it(`POST responds with 400 for missing required article field`, () => {
       return request
         .post(`/api/topics/${topicDocs[0]._id}/articles`)
         .send({
-          title: "anotherTest"
+          something: "anotherTest"
         })
         .expect(400)
         .then(res => {
-          console.log(res);
-          expect(res.body).to.equal(`Bad request : name is required!`);
+          expect(res.body.message).to.equal(`Bad request : body is required!`);
         });
     });
   });
@@ -136,17 +143,15 @@ describe("northcoders_news", () => {
         });
     });
   });
-  it("GET responds with status 400 for an invalid mongo ID", () => {
+  it("GET responds with status 404 for an article id that does not exist", () => {
     return request
       .get("/api/articles/dumdumdum")
-      .expect(400)
+      .expect(404)
       .then(res => {
-        expect(res.text).to.equal(
-          `Bad request : "dumdumdum" is an invalid ID!`
-        );
+        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
       });
   });
-  it("PUT /api/articles/:article_id?vote=down", () => {
+  it("PUT returns a comment vote increased by one", () => {
     return request
       .put(`/api/articles/${articleDocs[0]._id}?vote=down`)
       .expect(200)
@@ -154,12 +159,23 @@ describe("northcoders_news", () => {
         expect(res.body.article.votes).to.be.lessThan(articleDocs[0].votes);
       });
   });
-  it("PUT /api/articles/:article_id?vote=up", () => {
+
+  it("PUT returns a comment vote increased by one", () => {
     return request
       .put(`/api/articles/${articleDocs[0]._id}?vote=up`)
       .expect(200)
       .then(res => {
         expect(res.body.article.votes).to.be.greaterThan(articleDocs[0].votes);
+      });
+  });
+  it("PUT responds with status 400 for an invalid article id when using a vote", () => {
+    return request
+      .put(`/api/comments/$shoes?vote=down`)
+      .expect(400)
+      .then(res => {
+        expect(res.body.message).to.equal(
+          `Bad request : $shoes is an invalid id!`
+        );
       });
   });
   describe("/articles/:article_id/comments", () => {
@@ -178,7 +194,7 @@ describe("northcoders_news", () => {
           );
         });
     });
-    it("POST responds with status 201 and a new article added to the article", () => {
+    it("POST responds with status 201 and a new comment added to the article", () => {
       return request
         .post(`/api/articles/${articleDocs[0]._id}/comments`)
         .send({
@@ -190,6 +206,17 @@ describe("northcoders_news", () => {
         .expect(201)
         .then(res => {
           expect(res.body.comment.body).to.be.a("string");
+        });
+    });
+    it(`POST responds with 400 for missing required field`, () => {
+      return request
+        .post(`/api/articles/${articleDocs[0]._id}/comments`)
+        .send({
+          something: "anotherTest"
+        })
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal(`Bad request : body is required!`);
         });
     });
   });
@@ -221,17 +248,15 @@ describe("northcoders_news", () => {
         });
     });
   });
-  it("GET responds with status 400 for an invalid mongo ID", () => {
+  it("GET responds with status 400 for an invalid mongo comment ID", () => {
     return request
       .get("/api/comments/dumdumdum")
-      .expect(400)
+      .expect(404)
       .then(res => {
-        expect(res.text).to.equal(
-          `Bad request : "dumdumdum" is an invalid ID!`
-        );
+        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
       });
   });
-  it("PUT /api/comments/:comment_id?vote=down", () => {
+  it("PUT returns a comment vote decreased by one", () => {
     return request
       .put(`/api/comments/${commentDocs[0]._id}?vote=down`)
       .expect(200)
@@ -239,12 +264,22 @@ describe("northcoders_news", () => {
         expect(res.body.comment.votes).to.be.lessThan(commentDocs[0].votes);
       });
   });
-  it("PUT /api/comments/:comment_id?vote=up", () => {
+  it("PUT returns a comment vote increased by one", () => {
     return request
       .put(`/api/comments/${commentDocs[0]._id}?vote=up`)
       .expect(200)
       .then(res => {
         expect(res.body.comment.votes).to.be.greaterThan(commentDocs[0].votes);
+      });
+  });
+  it("PUT responds with status 400 for an invalid comment id when using vote", () => {
+    return request
+      .put(`/api/comments/shoes?vote=up`)
+      .expect(400)
+      .then(res => {
+        expect(res.body.message).to.equal(
+          `Bad request : shoes is an invalid id!`
+        );
       });
   });
   it(`DELETE responds with 200 and a console log saying 'Comment Delted!`, () => {
@@ -253,7 +288,12 @@ describe("northcoders_news", () => {
       .expect(200)
       .then(res => {
         expect(res.body.message).to.equal("Comment Deleted!");
-        return request.get(`/api/comments/${commentDocs[0]._id}`).expect(404);
+        return request
+          .get(`/api/comments/${commentDocs[0]._id}`)
+          .expect(200)
+          .then(res => {
+            expect(res.body.comment).to.equal(null);
+          });
       });
   });
   describe("/users", () => {
@@ -271,32 +311,24 @@ describe("northcoders_news", () => {
           expect(res.body.user[0].name).to.be.a("string");
         });
     });
-    describe("/users/:username", () => {
-      it("GET responds with a status 200 and user with the correct username", () => {
-        return request
-          .get(`/api/users/${userDocs[0].username}`)
-          .expect(200)
-          .then(res => {
-            expect(res.body.user[0].username).to.equal(
-              `${userDocs[0].username}`
-            );
-            expect(res.body.user[0]).to.include.keys(
-              "username",
-              "name",
-              "avatar_url"
-            );
-            expect(res.body.user[0].name).to.be.a("string");
-          });
-      });
-    });
-    it("GET responds with status 404 for a username that does not exist", () => {
+  });
+  describe("/users/:username", () => {
+    it("GET responds with a status 200 and user with the correct username", () => {
       return request
-        .get("/api/users/dumdumdum")
+        .get(`/api/users/${userDocs[0].username}`)
         .expect(200)
         .then(res => {
-          // console.log(res);
-          expect(res.text).to.equal(`Page not found for dumdumdum`);
+          expect(res.body.user.username).to.equal(`${userDocs[0].username}`);
+          expect(res.body.user.name).to.be.a("string");
         });
     });
+  });
+  it("GET responds with status 404 for a username that does not exist", () => {
+    return request
+      .get("/api/users/dumdumdum")
+      .expect(404)
+      .then(res => {
+        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
+      });
   });
 });

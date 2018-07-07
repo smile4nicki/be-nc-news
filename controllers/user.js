@@ -10,11 +10,17 @@ const getAllUsers = (req, res, next) => {
 
 const getUserByUsername = (req, res, next) => {
   const { username } = req.params;
-  User.find({ username: `${username}` })
+  User.findOne({ username: `${username}` })
     .then(user => {
-      res.status(200).send({ user });
+      if (!user) {
+        return next({
+          status: 404,
+          message: `Page not found for ${username}`
+        });
+      } else {
+        res.status(200).send({ user });
+      }
     })
     .catch(next);
 };
-
 module.exports = { getAllUsers, getUserByUsername };

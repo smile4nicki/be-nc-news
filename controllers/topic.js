@@ -12,11 +12,15 @@ const getTopicById = (req, res, next) => {
   const { topic_id } = req.params;
   Topic.findById(topic_id)
     .then(topic => {
-      topic === null
-        ? next({ status: 404, message: `Page not found for${topic_id}` })
-        : res.status(200).send({ topic });
+      res.status(200).send({ topic });
     })
-    .catch(next);
+    .catch(err => {
+      if (err.name === "CastError") {
+        next({ status: 404, message: `Page not found for ${topic_id}` });
+      } else {
+        next(err);
+      }
+    });
 };
 
 const getArticlesByTopicId = (req, res, next) => {
@@ -25,7 +29,14 @@ const getArticlesByTopicId = (req, res, next) => {
     .populate("belongs_to", "slug")
     .populate("created_by", "username")
     .then(article => {
-      return res.status(200).send({ article });
+      res.status(200).send({ article });
+    })
+    .catch(err => {
+      if (err.name === "CastError")
+        next({
+          status: 400,
+          message: `Bad request : dumdumdum is an invalid ID!`
+        });
     })
     .catch(next);
 };
@@ -39,31 +50,22 @@ const addArticlesByTopicId = (req, res, next) => {
   return newArticle
     .save()
     .then(article => {
-      return res.status(201).send({
+      res.status(201).send({
         article,
         message: "Just added this topic"
       });
     })
-    .catch(next);
+    .catch(err => {
+      if (err.name === "ValidationError") {
+        next({
+          status: 400,
+          message: `Bad request : ${err.errors.body.path} is required!`
+        });
+      } else {
+        next(err);
+      }
+    });
 };
-
-/*Get articles by topic
-//This method gets articles by topic when the slug is input into the url instead of the topic ID
-const getArticlesByTopic = (req, res, next) => {
-  let { topic } = req.params;
-  Article.find()
-    .populate("belongs_to", "slug")
-    .populate("created_by", "username")
-    .then(article => {
-      article = article.filter(topics => {
-        return (topics.belongs_to.slug = topic);
-      });
-      return res.status(200).send({ article });
-    })
-    .catch(next);
-};
-*/
-
 module.exports = {
   getAllTopics,
   getTopicById,
