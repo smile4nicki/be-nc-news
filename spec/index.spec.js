@@ -126,7 +126,7 @@ describe("northcoders_news", () => {
     });
   });
   describe("/articles/:article_id", () => {
-    it.only("GET responds with a status 200 and an article with the correct id", () => {
+    it("GET responds with a status 200 and an article with the correct id", () => {
       return request
         .get(`/api/articles/${articleDocs[0]._id}`)
         .expect(200)
@@ -170,7 +170,7 @@ describe("northcoders_news", () => {
   });
   it("PUT responds with status 400 for an invalid article id when using a vote", () => {
     return request
-      .put(`/api/comments/$shoes?vote=down`)
+      .put(`/api/articles/$shoes?vote=down`)
       .expect(400)
       .then(res => {
         expect(res.body.message).to.equal(
@@ -191,6 +191,16 @@ describe("northcoders_news", () => {
             "created_at",
             "belongs_to",
             "created_by"
+          );
+        });
+    });
+    it("GET responds with status 400 for an invalid article id when getting comments", () => {
+      return request
+        .get(`/api/articles/dumdumdum/comments`)
+        .expect(400)
+        .then(res => {
+          expect(res.body.message).to.equal(
+            `Bad request : dumdumdum is an invalid id!`
           );
         });
     });

@@ -31,11 +31,14 @@ const getCommentsByArticleId = (req, res, next) => {
       return res.status(200).send({ comment });
     })
     .catch(err => {
-      console.log(err.errors.body);
-      next({
-        status: 400,
-        message: `Bad request : dumdumdum is an invalid id!`
-      }).catch(next);
+      if (err.name === "CastError") {
+        next({
+          status: 400,
+          message: `Bad request : ${article_id} is an invalid id!`
+        });
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -74,14 +77,15 @@ const voteArticleById = (req, res, next) => {
       res.status(200).send({ article });
     })
     .catch(err => {
-      if (err.name === "CatchError") {
+      if (err.name === "CastError") {
         next({
           status: 400,
           message: `Bad request : ${article_id} is an invalid id!`
         });
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports = {
