@@ -9,6 +9,9 @@ mongoose
     return seedDB(rawData);
   })
   .then(() => {
+    console.log(`the database has been seeded!`);
+  })
+  .then(() => {
     return mongoose.disconnect();
   })
   .then(() => {

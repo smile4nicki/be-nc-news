@@ -126,7 +126,7 @@ describe("northcoders_news", () => {
     });
   });
   describe("/articles/:article_id", () => {
-    it("GET responds with a status 200 and an article with the correct id", () => {
+    it.only("GET responds with a status 200 and an article with the correct id", () => {
       return request
         .get(`/api/articles/${articleDocs[0]._id}`)
         .expect(200)

@@ -2,6 +2,7 @@ const { Article, Comment } = require("../models/index");
 
 const getAllArticles = (req, res, next) => {
   Article.find()
+    .populate("created_by", "name")
     .then(article => {
       res.status(200).send({ article });
     })

@@ -7,6 +7,10 @@ const config = {
 
   test: {
     DB_URL: "mongodb://localhost:27017/northcoders_news_test"
+  },
+  production: {
+    DB_URL:
+      "mongodb://testUser123:1northcodersnews@ds131601.mlab.com:31601/northcodersnews"
   }
 };
 
