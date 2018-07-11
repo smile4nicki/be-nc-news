@@ -14,13 +14,7 @@ const getTopicById = (req, res, next) => {
     .then(topic => {
       res.status(200).send({ topic });
     })
-    .catch(err => {
-      if (err.name === "CastError") {
-        next({ status: 404, message: `Page not found for ${topic_id}` });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const getArticlesByTopicId = (req, res, next) => {
@@ -30,13 +24,6 @@ const getArticlesByTopicId = (req, res, next) => {
     .populate("created_by", "username")
     .then(article => {
       res.status(200).send({ article });
-    })
-    .catch(err => {
-      if (err.name === "CastError")
-        next({
-          status: 400,
-          message: `Bad request : dumdumdum is an invalid ID!`
-        });
     })
     .catch(next);
 };
@@ -55,17 +42,9 @@ const addArticlesByTopicId = (req, res, next) => {
         message: "Just added this topic"
       });
     })
-    .catch(err => {
-      if (err.name === "ValidationError") {
-        next({
-          status: 400,
-          message: `Bad request : ${err.errors.body.path} is required!`
-        });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
+
 module.exports = {
   getAllTopics,
   getTopicById,

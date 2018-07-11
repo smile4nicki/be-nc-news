@@ -2,9 +2,19 @@ const { Article, Comment } = require("../models/index");
 
 const getAllArticles = (req, res, next) => {
   Article.find()
-    .populate("created_by", "name")
-    .then(article => {
-      res.status(200).send({ article });
+    .populate("created_by", "username")
+    .lean()
+    .then(articles => {
+      const countComments = articles.map(article => {
+        return Comment.count({ belongs_to: article._id });
+      });
+      return Promise.all([articles, ...countComments]);
+    })
+    .then(([articles, ...count]) => {
+      articles.forEach((article, index) => {
+        article.comments = count[index];
+      });
+      res.status(200).send({ articles });
     })
     .catch(next);
 };
@@ -13,15 +23,11 @@ const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   Article.findById(article_id)
     .then(article => {
-      res.status(200).send({ article });
+      article === null
+        ? next({ status: 404, message: `Page not found for ${article_id}` })
+        : res.status(200).send({ article });
     })
-    .catch(err => {
-      if (err.name === "CastError") {
-        next({ status: 404, message: `Page not found for ${article_id}` });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const getCommentsByArticleId = (req, res, next) => {
@@ -30,16 +36,7 @@ const getCommentsByArticleId = (req, res, next) => {
     .then(comment => {
       return res.status(200).send({ comment });
     })
-    .catch(err => {
-      if (err.name === "CastError") {
-        next({
-          status: 400,
-          message: `Bad request : ${article_id} is an invalid id!`
-        });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const addCommentsByArticleId = (req, res, next) => {
@@ -52,16 +49,7 @@ const addCommentsByArticleId = (req, res, next) => {
         .status(201)
         .send({ comment, message: `Just added this comment` });
     })
-    .catch(err => {
-      if (err.name === "ValidationError") {
-        next({
-          status: 400,
-          message: `Bad request : ${err.errors.body.path} is required!`
-        });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const voteArticleById = (req, res, next) => {
@@ -76,16 +64,7 @@ const voteArticleById = (req, res, next) => {
     .then(article => {
       res.status(200).send({ article });
     })
-    .catch(err => {
-      if (err.name === "CastError") {
-        next({
-          status: 400,
-          message: `Bad request : ${article_id} is an invalid id!`
-        });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports = {

@@ -107,7 +107,7 @@ describe("northcoders_news", () => {
     });
   });
   describe("/articles", () => {
-    it("GET responds with 200 and an array of articles", () => {
+    it.only("GET responds with 200 and an array of articles", () => {
       return request
         .get("/api/articles")
         .expect(200)

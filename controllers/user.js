@@ -13,10 +13,7 @@ const getUserByUsername = (req, res, next) => {
   User.findOne({ username: `${username}` })
     .then(user => {
       if (!user) {
-        return next({
-          status: 404,
-          message: `Page not found for ${username}`
-        });
+        throw err;
       } else {
         res.status(200).send({ user });
       }

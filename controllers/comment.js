@@ -14,13 +14,7 @@ const getCommentById = (req, res, next) => {
     .then(comment => {
       res.status(200).send({ comment });
     })
-    .catch(err => {
-      if (err.name === "CastError") {
-        next({ status: 404, message: `Page not found for ${comment_id}` });
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const voteCommentById = (req, res, next) => {
@@ -34,14 +28,6 @@ const voteCommentById = (req, res, next) => {
   )
     .then(comment => {
       return res.status(200).send({ comment });
-    })
-    .catch(err => {
-      if (err.name === "CastError") {
-        return next({
-          status: 400,
-          message: `Bad request : ${comment_id} is an invalid id!`
-        });
-      }
     })
     .catch(next);
 };

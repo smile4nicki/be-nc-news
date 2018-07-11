@@ -2,7 +2,7 @@
 
 An API which keeps the user updated on all the news at Northcoders. It uses Node.js and Mongo for the database.
 
-It can be accessed at https://git.heroku.com/nichola-northcoders-news.git
+It can be accessed at https://nichola-northcoders-news.herokuapp.com/
 
 ## Getting Started
 
@@ -49,6 +49,36 @@ npm i
 ```
 
 All the necessary dependencies with be installed at once.
+
+##Setting up the config file
+
+You will need to set up a config.js file to ensure that that you can can access the database and run tests. This should be set up in the root folder and can be created by typying the following into the command line:
+
+```
+touch config.js
+```
+
+It should be set up as follows:
+
+```
+process.env.NODE_ENV = process.env.NODE_ENV || "dev";
+
+const config = {
+  dev: {
+    DB_URL: "mongodb://localhost:27017/northcoders_news"
+  },
+
+  test: {
+    DB_URL: "mongodb://localhost:27017/northcoders_news_test"
+  },
+  production: {
+    DB_URL:
+      "mongodb://testUser123:1northcodersnews@ds131601.mlab.com:31601/northcodersnews"
+  }
+};
+
+module.exports = config[process.env.NODE_ENV];
+```
 
 ## Running the tests
 
@@ -121,7 +151,7 @@ the database has been seeded!
 
 ## Authors
 
-- **Nichola Ward** - _Initial work_ - [smile4nicki](https://github.com/smile4nicki)
+- **Nichola Ward** - [smile4nicki](https://github.com/smile4nicki)
 
 ## License
 
