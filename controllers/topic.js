@@ -1,4 +1,4 @@
-const { Topic, Article } = require("../models/index");
+const { Topic, Article, Comment } = require("../models/index");
 
 const getAllTopics = (req, res, next) => {
   Topic.find()
@@ -12,7 +12,9 @@ const getTopicById = (req, res, next) => {
   const { topic_id } = req.params;
   Topic.findById(topic_id)
     .then(topic => {
-      res.status(200).send({ topic });
+      topic === null
+        ? next({ status: 404, message: `Page not found for ${topic_id}` })
+        : res.status(200).send({ topic });
     })
     .catch(next);
 };
@@ -22,8 +24,18 @@ const getArticlesByTopicId = (req, res, next) => {
   Article.find({ belongs_to: `${topic_id}` })
     .populate("belongs_to", "slug")
     .populate("created_by", "username")
-    .then(article => {
-      res.status(200).send({ article });
+    .lean()
+    .then(articles => {
+      const countComments = articles.map(article => {
+        return Comment.count({ belongs_to: article._id });
+      });
+      return Promise.all([articles, ...countComments]);
+    })
+    .then(([articles, ...count]) => {
+      articles.forEach((article, index) => {
+        article.comments = count[index];
+      });
+      res.status(200).send({ articles });
     })
     .catch(next);
 };

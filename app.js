@@ -14,22 +14,23 @@ mongoose.connect(DB_URL).then(() => {
 });
 
 //ERR status 404 page not found
+app.use("/*", (req, res, next) => {
+  next({ status: 404, message: "Page not found" });
+});
+
+//ERR status 400 bad request
 app.use((err, req, res, next) => {
   err.status
     ? res.status(err.status).send({ message: err.message })
     : next(err);
 });
-
-//ERR status 400 bad request
 app.use((err, req, res, next) => {
   if (err.name === "CastError") {
     res.status(400).send(`Bad request : "${err.value}" is an invalid ID!`);
-  }
-  if (err.name === "ValidationError") {
-    res.status(400).send(`Bad request : ${err.errors.name.path} is requried!}`);
-  }
-  if (err.name === "TypeError") {
-    res.status(400).send(`Bad request : ${err.errors.name.path} is required!}`);
+  } else if (err.name === "ValidationError") {
+    res.status(400).send(`Bad request : ${err.errors.name.path} is requried!`);
+  } else if (err.name === "TypeError") {
+    res.status(400).send(`Bad request : ${err.errors.name.path} is required!`);
   } else {
     next(err);
   }

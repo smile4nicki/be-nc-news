@@ -80,6 +80,20 @@ const config = {
 module.exports = config[process.env.NODE_ENV];
 ```
 
+## Seeding the database
+
+You are required to seed the database. To do this type the following command into the command line:
+
+```
+npm run seed:dev
+```
+
+You will receive a message in the console to say that the database has been seeded:
+
+```
+the database has been seeded!
+```
+
 ## Running the tests
 
 To run the tests you must first ensure that mongo db is running. You can do this by typing the following command into the command line:
@@ -130,17 +144,15 @@ And tests have also been completed to ensure that errors are handled correclty:
 
 ## Deployment
 
-You are required to seed the database. To do this type the following command into the command line:
+To deploy the application please ensure that production key value pair is added to your config file.
+
+Using the following command:
 
 ```
-npm run seed:dev
+npm run deploy
 ```
 
-You will receive a message in the console to say that the database has been seeded:
-
-```
-the database has been seeded!
-```
+This will change the environment to production and seed the database to the database host - in this case mlabs.
 
 ## Built With
 

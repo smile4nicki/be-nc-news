@@ -45,9 +45,7 @@ const addCommentsByArticleId = (req, res, next) => {
   return newComment
     .save()
     .then(comment => {
-      return res
-        .status(201)
-        .send({ comment, message: `Just added this comment` });
+      res.status(201).send({ comment, message: `Just added this comment` });
     })
     .catch(next);
 };

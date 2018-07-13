@@ -45,9 +45,11 @@ describe("northcoders_news", () => {
   it("GET responds with status 400 for an invalid mongo topic ID", () => {
     return request
       .get("/api/topics/dumdumdum")
-      .expect(404)
+      .expect(400)
       .then(res => {
-        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
+        expect(res.text).to.equal(
+          `Bad request : "dumdumdum" is an invalid ID!`
+        );
       });
   });
   describe("/topics/:topic_id/articles", () => {
@@ -56,27 +58,28 @@ describe("northcoders_news", () => {
         .get(`/api/topics/${topicDocs[0]._id}/articles`)
         .expect(200)
         .then(res => {
-          expect(res.body.article[0].belongs_to.slug).to.equal(
+          expect(res.body.articles[0].belongs_to.slug).to.equal(
             `${topicDocs[0].slug}`
           );
-          expect(res.body.article[0]).to.include.keys(
+          expect(res.body.articles[0]).to.include.keys(
             "title",
             "body",
             "votes",
             "created_at",
             "belongs_to",
-            "created_by"
+            "created_by",
+            "comments"
           );
-          expect(res.body.article[0].title).to.be.a("string");
+          expect(res.body.articles[0].title).to.be.a("string");
         });
     });
-    it("GET responds with status 400 for an invalid topic mongo ID", () => {
+    it("GET responds with status 400 for an invalid topic mongo ID when getting articles by topic id", () => {
       return request
         .get("/api/topics/dumdumdum/articles")
         .expect(400)
         .then(res => {
-          expect(res.body.message).to.equal(
-            `Bad request : dumdumdum is an invalid ID!`
+          expect(res.text).to.equal(
+            `Bad request : "dumdumdum" is an invalid ID!`
           );
         });
     });
@@ -100,28 +103,30 @@ describe("northcoders_news", () => {
         .send({
           something: "anotherTest"
         })
-        .expect(400)
+        .expect(500)
         .then(res => {
+          console.log(res);
           expect(res.body.message).to.equal(`Bad request : body is required!`);
         });
     });
   });
   describe("/articles", () => {
-    it.only("GET responds with 200 and an array of articles", () => {
+    it("GET responds with 200 and an array of articles", () => {
       return request
         .get("/api/articles")
         .expect(200)
         .then(res => {
-          expect(res.body.article.length).to.equal(articleDocs.length);
-          expect(res.body.article[0]).to.include.keys(
+          expect(res.body.articles.length).to.equal(articleDocs.length);
+          expect(res.body.articles[0]).to.include.keys(
             "title",
             "body",
             "votes",
             "created_at",
             "belongs_to",
-            "created_by"
+            "created_by",
+            "comments"
           );
-          expect(res.body.article[0].votes).to.be.a("number");
+          expect(res.body.articles[0].votes).to.be.a("number");
         });
     });
   });
@@ -145,18 +150,20 @@ describe("northcoders_news", () => {
   });
   it("GET responds with status 404 for an article id that does not exist", () => {
     return request
-      .get("/api/articles/dumdumdum")
+      .get(`/api/articles/${topicDocs[0]._id}`)
       .expect(404)
       .then(res => {
-        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
+        expect(res.body.message).to.equal(
+          `Page not found for ${topicDocs[0]._id}`
+        );
       });
   });
-  it("PUT returns a comment vote increased by one", () => {
+  it("PUT returns a comment vote decreased by one", () => {
     return request
       .put(`/api/articles/${articleDocs[0]._id}?vote=down`)
       .expect(200)
       .then(res => {
-        expect(res.body.article.votes).to.be.lessThan(articleDocs[0].votes);
+        expect(res.body.article.votes).to.equal(articleDocs[0].votes - 1);
       });
   });
 
@@ -165,7 +172,7 @@ describe("northcoders_news", () => {
       .put(`/api/articles/${articleDocs[0]._id}?vote=up`)
       .expect(200)
       .then(res => {
-        expect(res.body.article.votes).to.be.greaterThan(articleDocs[0].votes);
+        expect(res.body.article.votes).to.equal(articleDocs[0].votes + 1);
       });
   });
   it("PUT responds with status 400 for an invalid article id when using a vote", () => {
@@ -173,9 +180,7 @@ describe("northcoders_news", () => {
       .put(`/api/articles/$shoes?vote=down`)
       .expect(400)
       .then(res => {
-        expect(res.body.message).to.equal(
-          `Bad request : $shoes is an invalid id!`
-        );
+        expect(res.text).to.equal(`Bad request : "$shoes" is an invalid ID!`);
       });
   });
   describe("/articles/:article_id/comments", () => {
@@ -199,8 +204,8 @@ describe("northcoders_news", () => {
         .get(`/api/articles/dumdumdum/comments`)
         .expect(400)
         .then(res => {
-          expect(res.body.message).to.equal(
-            `Bad request : dumdumdum is an invalid id!`
+          expect(res.text).to.equal(
+            `Bad request : "dumdumdum" is an invalid ID!`
           );
         });
     });
@@ -226,7 +231,7 @@ describe("northcoders_news", () => {
         })
         .expect(400)
         .then(res => {
-          expect(res.body.message).to.equal(`Bad request : body is required!`);
+          expect(res.body.message).to.equal("Path `body` is required.");
         });
     });
   });
@@ -261,9 +266,12 @@ describe("northcoders_news", () => {
   it("GET responds with status 400 for an invalid mongo comment ID", () => {
     return request
       .get("/api/comments/dumdumdum")
-      .expect(404)
+      .expect(400)
       .then(res => {
-        expect(res.body.message).to.equal(`Page not found for dumdumdum`);
+        console.log(res);
+        expect(res.text).to.equal(
+          `Bad request : "dumdumdum" is an invalid ID!`
+        );
       });
   });
   it("PUT returns a comment vote decreased by one", () => {
@@ -271,7 +279,7 @@ describe("northcoders_news", () => {
       .put(`/api/comments/${commentDocs[0]._id}?vote=down`)
       .expect(200)
       .then(res => {
-        expect(res.body.comment.votes).to.be.lessThan(commentDocs[0].votes);
+        expect(res.body.comment.votes).to.equal(commentDocs[0].votes - 1);
       });
   });
   it("PUT returns a comment vote increased by one", () => {
@@ -279,7 +287,7 @@ describe("northcoders_news", () => {
       .put(`/api/comments/${commentDocs[0]._id}?vote=up`)
       .expect(200)
       .then(res => {
-        expect(res.body.comment.votes).to.be.greaterThan(commentDocs[0].votes);
+        expect(res.body.comment.votes).to.equal(commentDocs[0].votes + 1);
       });
   });
   it("PUT responds with status 400 for an invalid comment id when using vote", () => {
@@ -287,9 +295,7 @@ describe("northcoders_news", () => {
       .put(`/api/comments/shoes?vote=up`)
       .expect(400)
       .then(res => {
-        expect(res.body.message).to.equal(
-          `Bad request : shoes is an invalid id!`
-        );
+        expect(res.text).to.equal(`Bad request : "shoes" is an invalid ID!`);
       });
   });
   it(`DELETE responds with 200 and a console log saying 'Comment Delted!`, () => {
