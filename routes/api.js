@@ -5,7 +5,7 @@ const { commentRouter } = require("./comment");
 const { articleRouter } = require("./article");
 
 apiRouter.get("/", (req, res) => {
-  res.send("This is the API page");
+  res.render("views/pages/index.html");
 });
 
 apiRouter.use("/topics", topicRouter);

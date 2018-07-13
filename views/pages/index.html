@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <header>
+    <h1>Northcoders News</h1>
+    <h1>API Endpoints</h1>
+  </header>
+  <main>
+    <h2>GET /api/topics</h2>
+    <h4>get all the topics</h4>
+    <h2>GET /api/topics/:topic/articles</h2>
+    <h4>return all the articles for a certain topic id</h4>
+    <h2>GET /api/articles</h2>
+    <h4>get all the articles</h4>
+    <h2>GET /api/articles/:article_id/comments</h2>
+    <h4>get all the comments for an individual article</h4>
+    <h2>POST /api/articles/:article_id/comments</h2>
+    <h4>add a new comment to an article</h4>
+    <h2>PUT /api/articles/:article_id</h2>
+    <h4>increment or decrement the votes of an article by one. A vote of query 'up' or 'down'</h4>
+    <h2>PUT /api/comments/:comment_id</h2>
+    <h4>increment or decrement the votes of an article by one. A vote of query 'up' or 'down'</h4>
+    <h2>DELETE /api/comments/:comment_id</h2>
+    <h4>deletes a comment if the comment was created by a Northcoder user</h4>
+    <h2>GET /api/users</h2>
+    <h4>get all users</h4>
+    <h2>GET /api/users/:username</h2>
+    <h4>returns an object with information for a person with a specific user ID</h4>
+  </main>
+</body>
+
+</html>

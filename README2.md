@@ -2,7 +2,7 @@
 
 An API which keeps the user updated on all the news at Northcoders. It uses Node.js and Mongo for the database.
 
-It can be accessed at https://nichola-northcoders-news.herokuapp.com/
+It can be accessed at https://nichola-northcoders-news.herokuapp.com/api
 
 ## Getting Started
 
