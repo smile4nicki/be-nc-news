@@ -28,7 +28,7 @@ app.use((err, req, res, next) => {
   if (err.name === "CastError") {
     res.status(400).send(`Bad request : "${err.value}" is an invalid ID!`);
   } else if (err.name === "ValidationError") {
-    res.status(400).send(`Bad request : ${err.errors.name.path} is requried!`);
+    res.status(400).send(`Bad request : required field is missing!`);
   } else if (err.name === "TypeError") {
     res.status(400).send(`Bad request : ${err.errors.name.path} is required!`);
   } else {

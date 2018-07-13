@@ -103,10 +103,9 @@ describe("northcoders_news", () => {
         .send({
           something: "anotherTest"
         })
-        .expect(500)
+        .expect(400)
         .then(res => {
-          console.log(res);
-          expect(res.body.message).to.equal(`Bad request : body is required!`);
+          expect(res.text).to.equal(`Bad request : required field is missing!`);
         });
     });
   });
@@ -231,7 +230,7 @@ describe("northcoders_news", () => {
         })
         .expect(400)
         .then(res => {
-          expect(res.body.message).to.equal("Path `body` is required.");
+          expect(res.text).to.equal("Bad request : required field is missing!");
         });
     });
   });
@@ -268,7 +267,6 @@ describe("northcoders_news", () => {
       .get("/api/comments/dumdumdum")
       .expect(400)
       .then(res => {
-        console.log(res);
         expect(res.text).to.equal(
           `Bad request : "dumdumdum" is an invalid ID!`
         );
