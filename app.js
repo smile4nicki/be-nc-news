@@ -20,6 +20,7 @@ app.use("/*", (req, res, next) => {
 
 //ERR status 400 bad request
 app.use((err, req, res, next) => {
+  console.log(err);
   err.status
     ? res.status(err.status).send({ message: err.message })
     : next(err);
