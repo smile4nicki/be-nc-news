@@ -75,6 +75,7 @@ const config = {
     DB_URL:
       "mongodb://testUser123:1northcodersnews@ds131601.mlab.com:31601/northcodersnews"
   }
+  // remove production url
 };
 
 module.exports = config[process.env.NODE_ENV];

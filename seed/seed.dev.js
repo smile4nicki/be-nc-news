@@ -16,5 +16,5 @@ mongoose
   })
   .then(() => {
     console.log(`successfully disconnected from ${DB_URL}...`);
-  })
-  .catch(console.log);
+  });
+// .catch(console.log);

@@ -41,17 +41,18 @@ describe("northcoders_news", () => {
           expect(res.body.topic._id).to.equal(`${topicDocs[0]._id}`);
         });
     });
+    it("GET responds with status 400 for an invalid mongo topic ID", () => {
+      return request
+        .get("/api/topics/dumdumdum")
+        .expect(400)
+        .then(res => {
+          expect(res.text).to.equal(
+            `Bad request : "dumdumdum" is an invalid ID!`
+          );
+        });
+    });
   });
-  it("GET responds with status 400 for an invalid mongo topic ID", () => {
-    return request
-      .get("/api/topics/dumdumdum")
-      .expect(400)
-      .then(res => {
-        expect(res.text).to.equal(
-          `Bad request : "dumdumdum" is an invalid ID!`
-        );
-      });
-  });
+
   describe("/topics/:topic_id/articles", () => {
     it("GET responds with status 200 and articles based on the topic id", () => {
       return request

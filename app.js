@@ -6,12 +6,15 @@ const bodyParser = require("body-parser");
 const apiRouter = require("./routes/api");
 const { DB_URL } = require("./config");
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use("/api", apiRouter);
 
 mongoose.connect(DB_URL).then(() => {
   console.log("You are connected to the Mongo Database!");
 });
+
+app.use(express.static("public"));
 
 //ERR status 404 page not found
 app.use("/*", (req, res, next) => {
@@ -20,7 +23,7 @@ app.use("/*", (req, res, next) => {
 
 //ERR status 400 bad request
 app.use((err, req, res, next) => {
-  console.log(err);
+  // console.log(err);
   err.status
     ? res.status(err.status).send({ message: err.message })
     : next(err);
