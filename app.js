@@ -5,6 +5,7 @@ mongoose.Promise = Promise;
 const bodyParser = require("body-parser");
 const apiRouter = require("./routes/api");
 const { DB_URL } = require("./config");
+const cors = require("cors");
 
 app.use(cors());
 app.use(bodyParser.json());
