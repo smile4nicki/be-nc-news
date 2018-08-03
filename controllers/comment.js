@@ -2,8 +2,8 @@ const { Comment } = require("../models/index");
 
 const getAllComments = (req, res, next) => {
   Comment.find()
-    .populate("created_by")
-    .then(comment => {
+    .populate("created_by", "username")
+    .then((comment) => {
       res.status(200).send({ comment });
     })
     .catch(next);
@@ -12,7 +12,7 @@ const getAllComments = (req, res, next) => {
 const getCommentById = (req, res, next) => {
   const { comment_id } = req.params;
   Comment.findById(comment_id)
-    .then(comment => {
+    .then((comment) => {
       res.status(200).send({ comment });
     })
     .catch(next);
@@ -27,7 +27,7 @@ const voteCommentById = (req, res, next) => {
     { $inc: { votes: increment } },
     { new: true }
   )
-    .then(comment => {
+    .then((comment) => {
       comment === null
         ? next({ status: 404, message: `Page not found for ${comment_id}` })
         : res.status(200).send({ comment });
@@ -38,7 +38,7 @@ const voteCommentById = (req, res, next) => {
 const deleteCommentById = (req, res, next) => {
   let { comment_id } = req.params;
   Comment.findByIdAndRemove(comment_id)
-    .then(comment => {
+    .then((comment) => {
       res.status(200).send({ comment, message: "Comment Deleted!" });
     })
     .catch(next);
