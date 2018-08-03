@@ -4,8 +4,8 @@ const getAllArticles = (req, res, next) => {
   Article.find()
     .populate("created_by", "username")
     .lean()
-    .then(articles => {
-      const countComments = articles.map(article => {
+    .then((articles) => {
+      const countComments = articles.map((article) => {
         return Comment.count({ belongs_to: article._id });
       });
       return Promise.all([articles, ...countComments]);
@@ -22,7 +22,8 @@ const getAllArticles = (req, res, next) => {
 const getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   Article.findById(article_id)
-    .then(article => {
+    .populate("created_by", "username")
+    .then((article) => {
       article === null
         ? next({ status: 404, message: `Page not found for ${article_id}` })
         : res.status(200).send({ article });
@@ -33,7 +34,7 @@ const getArticleById = (req, res, next) => {
 const getCommentsByArticleId = (req, res, next) => {
   let { article_id } = req.params;
   Comment.find({ belongs_to: `${article_id}` })
-    .then(comment => {
+    .then((comment) => {
       return res.status(200).send({ comment });
     })
     .catch(next);
@@ -44,7 +45,7 @@ const addCommentsByArticleId = (req, res, next) => {
   const newComment = new Comment({ ...req.body, belongs_to: article_id });
   return newComment
     .save()
-    .then(comment => {
+    .then((comment) => {
       res.status(201).send({ comment, message: `Just added this comment` });
     })
     .catch(next);
@@ -59,7 +60,7 @@ const voteArticleById = (req, res, next) => {
     { $inc: { votes: increment } },
     { new: true }
   )
-    .then(article => {
+    .then((article) => {
       res.status(200).send({ article });
     })
     .catch(next);
